@@ -1,0 +1,42 @@
+version: '3'
+services:
+  nginx:
+   container_name: dev-nginx
+   build: ./nginx
+   restart: always
+   ports:
+   - 8011:8011
+   - 443:443
+   volumes:
+   - ./nginx/conf.d:/etc/nginx/conf.d
+   depends_on:
+   - microservice-01
+   - microservice-02
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "4369:4369"
+      - "5671:5671"
+      - "5672:5672"
+      - "25672:25672"
+      - "15672:15672"
+
+  microservice-01:
+    image: havyx/microservice-01:latest
+    hostname: microservice-01
+    container_name: microservice-01
+    restart: always
+    depends_on:
+      - rabbitmq
+    command: --spring.profiles.active=dev
+
+  microservice-02:
+    image: havyx/microservice-02:latest
+    hostname: microservice-02
+    container_name: microservice-02
+    restart: always
+    depends_on:
+      - rabbitmq
+    command: --spring.profiles.active=dev
